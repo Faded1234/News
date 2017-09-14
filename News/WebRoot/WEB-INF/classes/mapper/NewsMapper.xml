@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruanko.dao.NewsMapper" >
+  <resultMap id="NewsResultMap" type="com.ruanko.entity.News" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="author" property="author" jdbcType="VARCHAR" />
+    <result column="keyword" property="keyword" jdbcType="VARCHAR" />
+    <result column="soure" property="soure" jdbcType="VARCHAR" />
+    <result column="creatTime" property="creattime" jdbcType="TIMESTAMP" />
+    <result column="click" property="click" jdbcType="INTEGER" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="del" property="del" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="new_id" property="newId" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    <!-- 一对一的关系 -->  
+    <!-- property: 指的是属性的值, javaType：指的是元素的类型 --> 
+    <association property="newType" javaType="NewType"> 
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="description" property="description" jdbcType="VARCHAR" />
+	    <result column="creatTime" property="creattime" jdbcType="TIMESTAMP" />
+	    <result column="orders" property="orders" jdbcType="INTEGER" />
+	    <result column="del" property="del" jdbcType="INTEGER" />
+    </association>
+    
+  </resultMap>
+<!--   <resultMap id="ResultMapWithBLOBs" type="com.ruanko.entity.News" extends="NewsResultMap" >
+  </resultMap> -->
+	
+	
+	
+  <!-- 通过id查找新闻 -->
+  <select id="select" parameterType="News" resultMap="NewsResultMap">
+  	select * from news
+    where  id = #{id} 
+  </select>
+    
+  <!-- 通过关键字分页查询，返回数据集 -->
+  <select id="selectPageList" parameterType="page" resultMap="NewsResultMap" >
+    select * from news 
+    <where>
+   	 state=1
+    	<if test="keyWord !=null">and new_id like #{keyWord}</if>
+    </where>
+	 limit #{start},#{rows}
+  </select>
+  
+  <!-- 通过关键字分页查询，返回总记录数 -->
+  <select id="selectPageCount" parameterType="page" resultType="Integer">
+  	select count(1) from news 
+  	  <where>
+  	  	state=1
+    	<if test="keyWord !=null">and new_id like #{keyWord}</if>
+    </where>
+  </select>
+  
+  <!-- 查找最新的八条新闻 -->
+  <select id="selectNew"  resultMap="NewsResultMap" >
+    select *  from news where state=1 order by creatTime desc LIMIT 0,5;
+  </select>  
+  
+  <!-- 查找热点新闻前十条 -->
+  <select id="selectHot"  resultMap="NewsResultMap" >
+    select *  from news where state=1 order by click desc LIMIT 0,10;
+  </select>  
+     
+   <!-- 通过关键字分页查询，返回数据集 -->
+  <select id="selectPageListByUserId" parameterType="page" resultMap="NewsResultMap" >
+    select
+    	 n.id,n.title,n.author,n.keyword,n.soure,n.creatTime,n.click,n.state,n.del,n.user_id,n.new_id ,n.content,
+    	 ns.id,ns.name,ns.description,ns.creatTime,ns.orders,ns.del
+    from 
+    	news n , newstype ns
+    <where>
+    	and n.new_id = ns.id
+    	<if test="paramEntity.userId !=null">and user_id = #{paramEntity.userId}</if>
+    	<if test="paramEntity.state !=null">and state = #{paramEntity.state}</if>
+    </where>
+	 limit #{start},#{rows}
+  </select>
+  <!-- 通过关键字分页查询，返回总记录数 -->
+  <select id="selectPageCountByUserId" parameterType="page" resultType="Integer">
+  	select count(1) from news 
+  	  <where>
+		<if test="paramEntity.userId !=null">and user_id like #{paramEntity.userId}</if>
+    	<if test="paramEntity.state !=null">and state = #{paramEntity.state}</if>
+    </where>
+  </select>
+  
+  <!-- 通过关键字分页查询，返回数据集 -->
+  <select id="selectPageListKey" parameterType="page" resultMap="NewsResultMap" >
+    select * from news 
+    <where>
+   	 state=1
+    	<if test="keyWord !=null">and keyword like #{keyWord}</if>
+    	<if test="paramEntity.newId !=null">and new_id = #{paramEntity.newId}</if>
+    </where>
+	 limit #{start},#{rows}
+  </select>
+  
+  <!-- 通过关键字分页查询，返回总记录数 -->
+  <select id="selectPageCountKey" parameterType="page" resultType="Integer">
+  	select count(1) from news 
+  	  <where>
+  	  	state=1
+    	<if test="keyWord !=null">and keyword like #{keyWord}</if>
+    	<if test="paramEntity.newId !=null">and new_id = #{paramEntity.newId}</if>
+    </where>
+  </select>
+  
+  <update id="update" parameterType="News">
+  	update  news set state = #{state} 
+  	where id = #{id}
+  </update>
+</mapper>

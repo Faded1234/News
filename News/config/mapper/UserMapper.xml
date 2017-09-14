@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruanko.dao.UserMapper" >
+  <resultMap id="UserResultMap" type="com.ruanko.entity.User" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="passwords" property="passwords" jdbcType="VARCHAR" />
+    <result column="role" property="role" jdbcType="INTEGER" />
+    <result column="del" property="del" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="select" parameterType="User" resultMap="UserResultMap">
+   	select id ,name ,passwords ,role ,del 
+   	from user 
+   <where>
+    	<if test="true"> name = #{name}</if>
+    	<if test="passwords !=null">and passwords = #{passwords}</if>
+    </where>
+  </select>
+  <insert id="insert" parameterType="User" >
+	insert into user (name ,passwords) value (#{name} ,#{passwords})
+  </insert>
+</mapper>
